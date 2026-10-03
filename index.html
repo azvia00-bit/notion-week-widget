@@ -1,0 +1,77 @@
+<div id="week-widget"></div>
+
+<script>
+function getWeekInfo(date) {
+  const d = new Date(Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ));
+
+  // ISO week starts Monday
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil(
+    (((d - yearStart) / 86400000) + 1) / 7
+  );
+
+  const monday = new Date(d);
+  monday.setUTCDate(d.getUTCDate() - 3);
+
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+
+  return {
+    week: weekNumber,
+    monday,
+    sunday
+  };
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  });
+}
+
+function updateWidget() {
+  const { week, monday, sunday } = getWeekInfo(new Date());
+
+  document.getElementById("week-widget").innerHTML = `
+    <div style="
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 20px;
+      border-radius: 16px;
+      background: #f7f7f5;
+      color: #37352f;
+    ">
+      <div style="
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      ">
+        Week ${week}
+      </div>
+
+      <div style="
+        font-size: 16px;
+        color: #787774;
+      ">
+        ${formatDate(monday)} – ${formatDate(sunday)}
+      </div>
+    </div>
+  `;
+}
+
+updateWidget();
+
+// Check every minute so it automatically changes
+// when Monday arrives.
+setInterval(updateWidget, 60000);
+</script>
